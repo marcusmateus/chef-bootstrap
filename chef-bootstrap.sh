@@ -20,7 +20,7 @@ bootstrap_type="$1"
 server_url="$2"
 
 # Install required packages
-apt-get install ruby ruby-dev libopenssl-ruby build-essential wget ssl-cert
+apt-get install -y ruby ruby-dev libopenssl-ruby build-essential wget ssl-cert
 
 # Install Rubygems from source
 cd /tmp
