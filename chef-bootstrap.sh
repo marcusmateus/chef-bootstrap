@@ -19,6 +19,9 @@ fi
 bootstrap_type="$1"
 server_url="$2"
 
+# Update sources
+apt-get update -y
+
 # Install required packages
 apt-get install -y ruby ruby-dev libopenssl-ruby build-essential wget ssl-cert
 
