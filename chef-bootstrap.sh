@@ -50,11 +50,9 @@ EOF
 # Create Chef server bootstrap config
 cat > /tmp/chef-server.json <<EOF
 {
-  "bootstrap": {
-    "chef": {
-      "server_url": "$server_url",
-      "webui_enabled": true
-    }
+  "chef": {
+    "server_url": "$server_url",
+    "webui_enabled": true
   },
   "run_list": [ "recipe[chef::bootstrap_server]" ]
 }
@@ -63,10 +61,8 @@ EOF
 # Create Chef client bootstrap config
 cat > /tmp/chef-client.json <<EOF
 {
-  "bootstrap": {
-    "chef": {
-      "server_url": "$server_url"
-    }
+  "chef": {
+    "server_url": "$server_url"
   },
   "run_list": [ "recipe[chef::bootstrap_client]" ]
 }
