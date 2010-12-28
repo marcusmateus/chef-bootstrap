@@ -2,6 +2,43 @@
 
 rubygems_version="1.3.7"
 
+# TODO somehow inject this as part of the bootstrap recipes?
+function _setup_iptables {
+cat > /etc/iptables.rules <<EOF
+*filter
+# Allow local loopback services
+-A INPUT -i lo -j ACCEPT
+-A OUTPUT -o lo -j ACCEPT
+
+# Allow ssh and web services
+-A INPUT -p tcp --dport ssh -i eth0 -j ACCEPT
+-A INPUT -p tcp --dport 80 -i eth0 -j ACCEPT
+-A INPUT -p tcp --dport 443 -i eth0 -j ACCEPT
+-A INPUT -p tcp --dport 444 -i eth0 -j ACCEPT
+
+# Allow pings
+-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
+
+# Allow traffic already established to continue
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Allow outgoing traffic and disallow any passthroughs
+-A INPUT -j DROP
+-A OUTPUT -j ACCEPT
+-A FORWARD -j DROP
+
+COMMIT
+EOF
+
+mkdir -p /etc/network/if-pre-up.d/
+cat > /etc/network/if-pre-up.d/iptables << EOF
+#!/bin/bash
+/sbin/iptables-restore < /etc/iptables.rules
+EOF
+chmod 0755 /etc/network/if-pre-up.d/iptables
+/sbin/iptables-restore < /etc/iptables.rules
+}
+
 function usage {
     echo "usage: $0 <client|server> <server-url>"
 }
@@ -25,6 +62,8 @@ if [[ $1 == 'server' && $2 == '' ]]; then
 else
   server_url="$2"
 fi
+
+_setup_iptables
 
 # Update sources
 apt-get update -y
@@ -61,7 +100,7 @@ cat > /tmp/chef-server.json <<EOF
     "server_url": "$server_url",
     "webui_enabled": true
   },
-  "run_list": [ "recipe[chef::bootstrap_server]" ]
+  "run_list": [ "recipe[chef::bootstrap_server]", "recipe[chef::server_proxy]" ]
 }
 EOF
 
