@@ -7,8 +7,10 @@ function usage {
 }
 
 if [[ $# != 2 ]]; then
+  if [[ $1 != 'server' ]]; then
     usage
     exit
+  fi
 fi
 
 if [[ $1 != 'server' && $1 != 'client' ]]; then
@@ -17,7 +19,12 @@ if [[ $1 != 'server' && $1 != 'client' ]]; then
 fi
 
 bootstrap_type="$1"
-server_url="$2"
+
+if [[ $1 == 'server' && $2 == '' ]]; then
+  server_url="http://localhost:4000"
+else
+  server_url="$2"
+fi
 
 # Update sources
 apt-get update -y
